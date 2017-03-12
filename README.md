@@ -12,7 +12,7 @@ Material UI-like Floating Action Button and Menu for Ionic applications with bac
 
 #### Install
 
-`bower install ion-floating-menu`
+`download the project and add the files in your index.html`
 
 
 #### JS/CSS Imports (index.html)
