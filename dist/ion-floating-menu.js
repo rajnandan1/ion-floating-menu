@@ -36,7 +36,7 @@
                 text: '@?',
                 textClass: '@?',
                 bottom: '@?'},
-            template: '<ul ng-click="click(); $event.stopPropagation();" id="floating-button" ng-class="{\'center\': isCentered}" ng-style="{\'bottom\' : \'{{bottom}}\' }">' +
+            template: '<ul ng-click="click()" id="floating-button" ng-class="{\'center\': isCentered}" ng-style="{\'bottom\' : \'{{bottom}}\' }">' +
                     '<li ng-class="buttonClass" ng-style="{\'background-color\': buttonColor }">' +
                     '<a><span ng-if="text" class="label-container"><span class="label" ng-class="textClass" ng-bind="text"></span></span><i class="icon menu-icon" ng-class="{ \'{{icon}}\' : true}" ng-style="{\'color\': iconColor }"></i></a>' +
                     '</li>' +
@@ -108,7 +108,7 @@
                 text: '@?',
                 textClass: '@?'},
             template:
-                    '<li ng-click="click(); $event.stopPropagation();" ng-class="buttonClass" ng-style="{\'background-color\': buttonColor }">' +
+                    '<li ng-click="click()" ng-class="buttonClass" ng-style="{\'background-color\': buttonColor }">' +
                     '<span ng-if="text" class="label-container"><span class="label" ng-class="textClass" ng-bind="text"></span></span>' +
                     '<img ng-if="iconImagePath" class="menu-icon" ng-class="iconImageClass" ng-src="{{iconImagePath}}"/>' +
                     '<i ng-if="!iconImagePath" class="icon menu-icon" ng-class="{ \'{{icon}}\' : true}" ng-style="{\'color\': iconColor }"></i>' +
@@ -118,8 +118,8 @@
         };
     }
 
-    ionFloatingMenuCtrl.$inject = ['$scope', '$rootScope', '$ionicBackdropIon'];
-    function ionFloatingMenuCtrl($scope, $rootScope, $ionicBackdropIon) {
+    ionFloatingMenuCtrl.$inject = ['$scope', '$rootScope', '$ionicBackdropIon','$ionicPlatform','$timeout'];
+    function ionFloatingMenuCtrl($scope, $rootScope, $ionicBackdropIon,$ionicPlatform,$timeout) {
         $scope.isOpen = false;
         $scope.open = function () {
             $scope.isOpen = !$scope.isOpen;
@@ -129,6 +129,11 @@
                 $scope.setClose();
             }
         };
+        if(document.getElementById("floatingBD"))
+            document.getElementById("floatingBD").addEventListener("click",function(e){
+               $scope.setClose();$timeout(function(){ $scope.isOpen = false;});
+            },false);
+        var deregisterFirst=null;
         $scope.setOpen = function () {
             $scope.buttonColor = menuOpenColor;
             $scope.icon = menuOpenIcon;
@@ -138,6 +143,12 @@
                 $ionicBackdropIon.retain();
             }
             $rootScope.$broadcast('floating-menu:open');
+            deregisterFirst = $ionicPlatform.registerBackButtonAction(
+              function(event) {
+                event.preventDefault();
+                $scope.setClose();$timeout(function(){ $scope.isOpen = false;});
+            }, 101);
+            
         };
         $scope.setClose = function () {
             $scope.buttonColor = menuColor;
@@ -147,6 +158,10 @@
                 $ionicBackdropIon.release();
             }
             $rootScope.$broadcast('floating-menu:close');
+            if (deregisterFirst)
+            {
+                deregisterFirst();
+            }
         };
         var menuColor = $scope.menuColor || '#2AC9AA';
         var menuIcon = $scope.menuIcon || 'ion-plus';
@@ -174,11 +189,11 @@
 
     $ionicBackdropIon.$inject = ['$document', '$timeout', '$$rAF', '$rootScope'];
     function $ionicBackdropIon($document, $timeout, $$rAF, $rootScope) {
-        var el = angular.element('<div class="backdrop">');
+        var el = angular.element('<div class="backdrop" id="floatingBD" >');
         var backdropHolds = 0;
 
-
-        var a = angular.element(document.querySelector('ion-content')).append(el[0]);
+        console.log(backdropHolds);
+        var a = angular.element(document.querySelector('ion-tabs')).append(el[0]);
 
         return {
             /**
@@ -225,6 +240,7 @@
         }
 
         function getElement() {
+
             return el;
         }
 

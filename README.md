@@ -1,5 +1,7 @@
 # ion-floating-menu
-Material UI-like Floating Action Button and Menu for Ionic applications
+Material UI-like Floating Action Button and Menu for Ionic applications with backdrop tap to close and hardware back button to close
+
+
 
 ## Features
 
